@@ -8,7 +8,9 @@ library(dplyr)
 library(stringr)
 library(tictoc)
 library(shinycssloaders)
-library(leaflet.opacity)
+library(leaflet.multiopacity)
+library(raster)
+
 
 # if (Sys.info()[["user"]] == "mirza")
 # {
@@ -20,25 +22,30 @@ library(leaflet.opacity)
 # }
 
 
-# Script setup ------------------------------------------------------------
+# Script setup ####
 
 
 source(here::here("app_functions.R"))
+source(here::here("scripts", "leaflet_opacity.R"))
 
 
-projections_datavizz_folder <- "Projects/atra_climate_model/runs/climate_impact/Datavizz" %>% 
-    Rahat::milkunize2("archive")
+# projections_datavizz_folder <- "Projects/atra_climate_model/runs/climate_impact/Datavizz" %>% 
+#     Rahat::milkunize2("archive")
 
 #### Output data is on milkun archive
-bivariate_names <- projections_datavizz_folder %>% 
-    list.files(full.names = TRUE)
+bivariate_names <- 
+    # projections_datavizz_folder %>% 
+    here("data_tmp", "bivariate") %>% 
+    list.files(full.names = TRUE, pattern = "leaflet")
 
 
-data_points <- st_read(here::here("test_data", "points_rcp85.gpkg"))
+data_points <- st_read(here::here("data_tmp", "points_rcp85.gpkg"))
 
-update = Rahat::today(format = "human")
+update = today(format = "human")
 
-#### UI part ####
+tiles <- c(providers$OpenStreetMap, providers$Stamen.Terrain, 
+           providers$Esri.WorldImagery)
+# UI part ####
 ui <- bootstrapPage(
     tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
     navbarPage(theme = shinytheme("flatly"), collapsible = TRUE,
@@ -93,8 +100,8 @@ ui <- bootstrapPage(
                             )
                         )
                ),
-               ##############################
-               ##### Panel 1 bivariate projections ####
+               ############################# #
+               ## Panel 1 bivariate projections ####
                tabPanel("Bivariate projections",
                         div(class="outer",
                             tags$head(includeCSS("styles.css")),
@@ -124,13 +131,26 @@ ui <- bootstrapPage(
                                                          )
                                                          # unique(data_points$subspecies)
                                           ),
+                                          selectizeInput("categories_panel1", "Select layer categories:",
+                                                         # c("rcp26", "rcp85"),
+                                                         mydf$category,
+                                                         multiple = TRUE,
+                                                         options = list(
+                                                           placeholder = 'Filter categories',
+                                                           onInitialize = I('function() { this.setValue(""); }')
+                                                         )
+                                                         # unique(data_points$subspecies)
+                                          ),
+                                          actionButton(
+                                              "plot_panel1", "Render map"
+                                          ),
                                           downloadButton("downloadBivariateRasterData", "Download bivar data")
                                           
                             )
                             
                         )
                ),
-               ###################################
+               ################################## #
                ##### Panel 2 individual projections
                tabPanel("Individual projections",
                         div(class="outer",
@@ -285,7 +305,7 @@ ui <- bootstrapPage(
 #   })
 # }
 
-#### Server part ####
+# Server part ####
 
 server_new <- function(input, output, session) {
     
@@ -308,27 +328,12 @@ server_new <- function(input, output, session) {
         }
     )
     
-    #### Panel 1 stuff ####
+    ## Panel 1 stuff ####
     
     
     
     
-    output$map_panel1 <- renderLeaflet({
-        # Use leaflet() here, and only include aspects of the map that
-        # won't need to change dynamically (at least, not unless the
-        # entire map is being torn down and recreated).
-        leaflet() %>%
-            addTiles(group = "OSM (default)") %>%
-            addProviderTiles(providers$Stamen.Terrain, group = "Terrain") %>% 
-            addProviderTiles(providers$Esri.WorldImagery, group = "Sattelite") %>% 
-            addLayersControl(
-                position = "topleft",
-                baseGroups = c("OSM (default)", "Terrain", "Sattelite"),
-                options = layersControlOptions(collapsed = FALSE)
-            ) %>% 
-            fitBounds(7, 42, 20, 47)
-        
-    })
+  
     
     data_panel1 <- reactive({
         
@@ -338,7 +343,9 @@ server_new <- function(input, output, session) {
                 x = bivariate_names,
                 period = input$period_panel1,
                 taxon = input$taxon_panel1,
-                scenario = input$scenario_panel1)
+                scenario = input$scenario_panel1,
+                folder = here("data_tmp", "bivariate")
+                )
             
             return(x)
         }
@@ -347,13 +354,37 @@ server_new <- function(input, output, session) {
             x <- make_bivar(
                 x = bivariate_names,
                 period = input$period_panel1,
-                taxon = input$taxon_panel1
+                taxon = input$taxon_panel1,
+                folder = here("data_tmp", "bivariate")
             )
             
             return(x)
             
         }
         
+        
+    })
+    
+    output$map_panel1 <- renderLeaflet({
+        # Use leaflet() here, and only include aspects of the map that
+        # won't need to change dynamically (at least, not unless the
+        # entire map is being torn down and recreated).
+        leaflet() %>%
+            addProviderTiles(providers$OpenStreetMap, group = "OSM (default)", layerId = "tile1") %>% 
+            addProviderTiles(providers$Stamen.Terrain, group = "Terrain", layerId = "tile2") %>%
+            addProviderTiles(providers$Esri.WorldImagery, group = "Sattelite", layerId = "tile3") %>%
+            addLayersControl(
+                position = "topleft",
+                baseGroups = c("OSM (default)", "Terrain", "Sattelite"),
+                options = layersControlOptions(collapsed = FALSE)
+            ) %>%
+            addOpacityControls(layerId = c("Layer opacity"),
+                               collapsed = FALSE, position = "topleft",
+                               renderOnLayerAdd = TRUE
+                               # title = "Layer opacity"
+                               ) %>% 
+            # addOpacitySlider2(layerId = "raster") %>% 
+            fitBounds(7, 42, 20, 47)
         
     })
     
@@ -391,7 +422,8 @@ server_new <- function(input, output, session) {
             }
         )
         
-        if (nchar(input$period_panel1) > 1 & nchar(input$taxon_panel1) > 1)
+        # if (nchar(input$period_panel1) > 1 & nchar(input$taxon_panel1) > 1)
+        if (input$plot_panel1)
         {
             print(str_glue("
                      {input$period_panel1}
@@ -405,14 +437,65 @@ server_new <- function(input, output, session) {
             #   stop("ERROR")
             # } else {
             r_bivar <- raster(data_panel1())
-            r_bivar <- leaflet::projectRasterForLeaflet(r_bivar, method = "ngb")
+            
+            if (!str_detect(st_crs(r_bivar)$input, "Pseudo-Mercator"))
+            {
+                r_bivar <- leaflet::projectRasterForLeaflet(r_bivar, method = "ngb")
+            }
+           
+         
+            
+            if (length(input$categories_panel1) > 0)
+            {
+              
+              my_categories <- mydf %>% 
+                filter(category != "00") %>% 
+                filter(!category %in% input$categories_panel1) %>%
+                pull(ID)
+              
+              r_bivar_vals <- getValues(r_bivar)
+              r_bivar_vals[r_bivar_vals %in% my_categories] <- NA
+              r_bivar <- setValues(r_bivar, r_bivar_vals)
+              
+              #### Set categorical value
+              r_bivar <- ratify(r_bivar)
+              rat <- levels(r_bivar)[[1]]
+              ####
+              
+              my_category_lvel <- mydf %>% 
+                filter(category != "00") %>% 
+                filter(ID %in% rat$ID) %>% 
+                filter(category %in% input$categories_panel1) %>%
+                pull(category) %>% 
+                as.character()
+              
+              
+              rat$lvl <- my_category_lvel
+              levels(r_bivar) <- rat
+              
+            } else 
+            {
+              r_bivar <- ratify(r_bivar)
+              rat <- levels(r_bivar)[[1]]
+              ####
+              
+              my_category_lvel <- mydf %>% 
+                filter(category != "00") %>% 
+                filter(ID %in% rat$ID) %>% 
+                pull(category) %>% 
+                as.character()
+              
+              rat$lvl <- my_category_lvel
+              levels(r_bivar) <- rat
+              
+            }
             
             # }
-            
-            
-            
             pal <- colorNumeric(c("#0C2C84", "#41B6C4", "#FFFFCC"), values(r_bivar),
                                 na.color = "transparent")
+            
+            pal_cat <- colorFactor(c("#0C2C84", "#41B6C4", "#FFFFCC"), values(r_bivar),
+                                   na.color = "transparent")
             
             #### Set title according to timeperiod
             if (input$period_panel1 == "Future")
@@ -424,25 +507,43 @@ server_new <- function(input, output, session) {
                 plot_title <-  str_glue("{str_to_title(input$period_panel1)} bivariate projection for {input$taxon_panel2}")
             }
             
+           
+
             withProgress(message = "Calculating bivariate projection", value = 20,
                          {
                              leafletProxy("map_panel1") %>%
                                  clearImages() %>%
                                  clearControls() %>%
+                                 # clearTiles() %>%
+                                 addProviderTiles(providers$OpenStreetMap, group = "OSM (default)", layerId = "tile1") %>% 
+                                 addProviderTiles(providers$Stamen.Terrain, group = "Terrain", layerId = "tile2") %>%
+                                 addProviderTiles(providers$Esri.WorldImagery, group = "Sattelite", layerId = "tile3") %>%
                                  addRasterImage(r_bivar,
                                                 colors = pal, project = FALSE,
-                                                layerId = "raster") %>%
-                                 addOpacitySlider(layerId = "raster") %>% 
-                                 addLegend(pal = pal, values = values(r_bivar),
-                                           position = "bottomright",
-                                           title = plot_title)
+                                                layerId = "Layer opacity") %>%
+                                 # addOpacitySlider2(layerId = "raster") %>% 
+                             addLegend(pal = pal_cat, 
+                                       values = values(r_bivar),
+                                       title = plot_title,
+                                       position = "bottomright",
+                                       labFormat  = labelFormat(
+                                         transform = function(x) {
+                                           levels(r_bivar)[[1]]$lvl[which(levels(r_bivar)[[1]]$ID == x)]
+                                           
+                                         }
+                                       )
+                             )
+                                 # addLegend(pal = pal, values = values(r_bivar),
+                                 #           position = "bottomright",
+                                 #           title = plot_title)
+                                 ##
                          }
             )
             
         }
     })
     
-    #### Panel 2 stuff ####
+    ## Panel 2 stuff ####
     
     
     
@@ -636,9 +737,9 @@ server_new <- function(input, output, session) {
 }
 
 
-
-# runApp(shinyApp(ui, server_new), launch.browser = T)
+# Run app ####
+runApp(shinyApp(ui, server_new), launch.browser = T)
 # shinyApp(ui, server)
-shinyApp(ui, server_new)
+# shinyApp(ui, server_new)
 
-######################
+##################### #
