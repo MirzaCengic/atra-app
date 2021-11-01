@@ -1,5 +1,5 @@
 
-# *Alpine salamander* Supplementary Info Shiny app
+# *Salamandra* Supplementary Info Shiny app
 
 **\[work in progress\]**
 
