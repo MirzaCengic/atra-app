@@ -3,6 +3,46 @@ output: rmarkdown::github_document
 ---
   
   
-# *Alpine salamander* Shiny app  
+# *Alpine salamander* Supplementary Info Shiny app  
 
-Something something.
+This is the repository with digital Supplementary Information for the alpine salamander paper [title peding].
+You can clone this entire repository and run the app locally. RStudio project is built with [`renv`](https://rstudio.github.io/renv/){target="_blank"} package manager.  
+
+## How to install
+
+### Clone the repository
+
+If you have git available on your computer, run git command below.
+
+```{git, eval=FALSE, echo=TRUE}
+git clone https://github.com/MirzaCengic/atra-app.git
+```
+
+Otherwise, you can download zip file of the project, including data and packages.
+
+[INCLUDE SCREENSHOT]  
+
+Open RStudio project file `atra-app.RProj`. First you will need to set up packages with `renv`.  
+
+Run code below to install package if needed.
+
+```{r eval=FALSE, echo=TRUE}
+if (!requireNamespace("remotes"))
+  install.packages("remotes")
+
+remotes::install_github("rstudio/renv")
+```
+
+Then setup packages.  
+
+```{r}
+# Use renv::init() to initialize a project. renv will discover the R packages used in your project, 
+# and install those packages into a private project library.
+renv::init()
+```
+
+## How to run
+
+To run the app, open script `R/run_app.R`. This script will source scripts with initial setup, and Shiny app user interface and backend setup. If script `R/app_setup.R` is sourced sucessfuly, this means that the app should work right away. 
+
+Run function `runApp()` to attempt launching the browser with the app.   
