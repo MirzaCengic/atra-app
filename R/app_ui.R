@@ -14,10 +14,12 @@ ui <- bootstrapPage(
              tabPanel("Main page",
                       tags$div(
                         tags$h1("Main page"),
+                        tags$b("Main page still under construction"), tags$br(), 
                         "This is the digital Supplementary Information document accompanying Salamandra atra climate impact paper.",
+                        tags$br(),
                         "There are several tabs you can use to navigate:",
-                        tags$h3("Species data"),
-                        "Species data tab can be used to visualize and download occurence records. Species occurences can be downloaded in ", tags$a(href="https://www.geopackage.org/", "GeoPackage", target = "_blank"), " or in ", tags$a(href="https://desktop.arcgis.com/en/arcmap/latest/manage-data/shapefiles/what-is-a-shapefile.htm", "Shapefile", target = "_blank"), " format. If Shapefile option is selected, files will be provided in zipped archive.",
+                        tags$h3("Species data tab"),
+                        "Visualize and download occurence records. Download species data in ", tags$a(href="https://www.geopackage.org/", "GeoPackage", target = "_blank"), " or in ", tags$a(href="https://desktop.arcgis.com/en/arcmap/latest/manage-data/shapefiles/what-is-a-shapefile.htm", "Shapefile", target = "_blank"), " format. If Shapefile option is selected, files will be provided in zipped archive.",
                         tags$h3("Bivariate projections"),
                         "Bivariate projections combine climate suitability data with model agreement data, indicating prediction certainty. Both suitability and certainty are reclassified into low-medium-high categories. There are 9 possible combinations of two variables:",
                         tags$br(),
@@ -123,7 +125,7 @@ ui <- bootstrapPage(
                                                        # c("rcp26", "rcp85"),
                                                        NULL,
                                                        options = list(
-                                                         placeholder = 'Relevant only for future time period',
+                                                         placeholder = 'For future time period onlys',
                                                          onInitialize = I('function() { this.setValue(""); }')
                                                        )
                                         ),
