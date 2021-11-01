@@ -115,10 +115,26 @@ ui <- bootstrapPage(
                                         ),
                                         selectizeInput("taxon_panel1", "Select taxon:",
                                                        # c("RCP85", "RCP26")
-                                                       unique(data_points$subspecies),
+                                                       c(
+                                                         "<i>Salamandra atra</i>" = "points_all",
+                                                         "<i>Salamandra atra atra</i>" = "points_atra",
+                                                         "<i>Salamandra atra prenjensis</i>" = "points_prenjensis"
+                                                       ),
+                                                       # unique(data_points$subspecies),
                                                        options = list(
                                                          placeholder = 'Please select an option below',
-                                                         onInitialize = I('function() { this.setValue(""); }')
+                                                         onInitialize = I('function() { this.setValue(""); }'),
+                                                         # Text in italics
+                                                         render = I(
+                                                           '{
+                           item: function(item, escape) {
+                           return "<div>" + item.label + "</div>"
+                           },
+                           option: function(item, escape) {
+                           return "<div>" + item.label + "</div>"
+                           }
+  }'
+                                                         )
                                                        )
                                         ),
                                         selectizeInput("scenario_panel1", "Select RCP scenario:",
@@ -178,10 +194,26 @@ ui <- bootstrapPage(
                                             ),
                                             selectizeInput("taxon_panel2", "Select taxon:",
                                                            # c("RCP85", "RCP26")
-                                                           unique(data_points$subspecies),
+                                                           # unique(data_points$subspecies),
+                                                           c(
+                                                             "<i>Salamandra atra</i>" = "points_all",
+                                                             "<i>Salamandra atra atra</i>" = "points_atra",
+                                                             "<i>Salamandra atra prenjensis</i>" = "points_prenjensis"
+                                                           ),
                                                            options = list(
                                                              placeholder = 'Please select an option below',
-                                                             onInitialize = I('function() { this.setValue(""); }')
+                                                             onInitialize = I('function() { this.setValue(""); }'),
+                                                             # Text in italics
+                                                             render = I(
+                                                               '{
+                           item: function(item, escape) {
+                           return "<div>" + item.label + "</div>"
+                           },
+                           option: function(item, escape) {
+                           return "<div>" + item.label + "</div>"
+                           }
+  }'
+                                                             )
                                                            )
                                             ),
                                             selectizeInput("algorithm_panel2", "Select algorithm:",
