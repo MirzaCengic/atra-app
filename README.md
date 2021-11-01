@@ -1,6 +1,8 @@
 
 # *Alpine salamander* Supplementary Info Shiny app
 
+**\[work in progress\]**
+
 This is the repository with digital Supplementary Information for the
 alpine salamander paper \[title peding\]. You can clone this entire
 repository and run the app locally. RStudio project is built with
