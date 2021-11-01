@@ -1,17 +1,17 @@
-#### Atra Shiny app setup ####
+#### Atra Shiny app - Main script ####
 
-# app setup loads packages and loads data
-# server and ui might be a bit outdated; most recent code is in the app liteS
+
+## app_setup loads packages and loads data
 source(here::here("R", "app_setup.R"))
+## load server and ui part
 source(here::here("R", "app_server.R"))
 source(here::here("R", "app_ui.R"))
 
-
-
-
-
 # Run app -----------------------------------------------------------------
 
-runApp(shinyApp(ui, server), launch.browser = T)
+## Launch in browser
+runApp(shinyApp(ui, server), launch.browser = TRUE)
+
+## Launch via RStudio
 # shinyApp(ui, server)
 # shinyApp(ui, server_new)
