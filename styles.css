@@ -14,6 +14,8 @@ div.outer {
   padding: 0;
 }
 
+
+
 div.selectt {
   background-color: #ffaafe;
 }
@@ -29,6 +31,7 @@ div.selectt {
     font-weight: 200;
   }
 h1, h2, h3, h4 { font-weight: 400; }
+h5 { font-weight: bold; }
 
 #controls {
 /* Appearance */
