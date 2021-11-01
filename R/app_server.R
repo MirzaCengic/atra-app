@@ -133,12 +133,27 @@ server <- function(input, output, session) {
       }
     )
     
+    
+    # (input$period_panel1 == "Current" & nchar(input$taxon_panel1) > 1) | (input$period_panel1 == "Future" & nchar(input$taxon_panel1) > 1 & nchar(input$scenario_panel1) > 1)
     #### P1 render ####
+    # if ((input$period_panel1 == "Current" & nchar(input$taxon_panel1) > 1) | (input$period_panel1 == "Future" & nchar(input$taxon_panel1) > 1 & nchar(input$scenario_panel1) > 1))
+    # {
+    #   enable("plot_panel1")
+    #   # if (input$period_panel1 == "Future" & nchar(input$scenario_panel1) < 1)
+    #   # {
+    #   #   input$scenario_panel1 = ""
+    #   # }
+    # } else {
+    #   disable("plot_panel1")
+    # }
+    
+    
     # Observe Render map button event. 
     # BUG there's a bag where button value should be reset once it's activated. 
     # BUG For example, if current period map is rendered, and then future is selected without scenario, this will crash the app since it doesn't have value for {scenario}
     if (input$plot_panel1)
     {
+      
       ## Some bug cathing console outputs
       # print(str_glue("
       #                {input$period_panel1}
@@ -285,35 +300,36 @@ server <- function(input, output, session) {
   })
   
   # Panel 1 - Freeze scenario pane (wait for Future period input)
-  observe({
-    if(input$period_panel1 == "Current"){
-      toggleState(id = "variable")
-    }
-    
-    else if(input$period_panel1 == "Future"){
-      toggleState(id = "variable")
-      updateSelectInput(session = session,
-                        inputId = "scenario_panel1",
-                        choices = c("RCP2.6" = "rcp26", "RCP8.5" = "rcp85")
-                          # c("rcp26", "rcp85")
-      )
-    }
-  })
+  # observe({
+  #   if(input$period_panel1 == "Current"){
+  #     toggleState(id = "variable")
+  #   }
+  #   
+  #   else if(input$period_panel1 == "Future"){
+  #     toggleState(id = "variable")
+  #     updateSelectInput(session = session,
+  #                       inputId = "scenario_panel1",
+  #                       choices = c("RCP2.6" = "rcp26", "RCP8.5" = "rcp85"),
+  #                       selected = "rcp26"
+  #                         # c("rcp26", "rcp85")
+  #     )
+  #   }
+  # })
   # Panel 2 - Freeze scenario pane 
-  observe({
-    if(input$period_panel2 == "Current"){
-      toggleState(id = "variable")
-    }
-    
-    else if(input$period_panel2 == "Future"){
-      toggleState(id = "variable")
-      updateSelectInput(session = session,
-                        inputId = "scenario_panel2",
-                        choices = c("RCP2.6" = "rcp26", "RCP8.5" = "rcp85")
-                        # c("rcp26", "rcp85")
-      )
-    }
-  })
+  # observe({
+  #   if(input$period_panel2 == "Current"){
+  #     toggleState(id = "variable")
+  #   }
+  #   
+  #   else if(input$period_panel2 == "Future"){
+  #     toggleState(id = "variable")
+  #     updateSelectInput(session = session,
+  #                       inputId = "scenario_panel2",
+  #                       choices = c("RCP2.6" = "rcp26", "RCP8.5" = "rcp85")
+  #                       # c("rcp26", "rcp85")
+  #     )
+  #   }
+  # })
   
   ## Panel 2 stuff ##########################################################
   

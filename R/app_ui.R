@@ -137,12 +137,14 @@ ui <- bootstrapPage(
                                                          )
                                                        )
                                         ),
-                                        selectizeInput("scenario_panel1", "Select RCP scenario:",
-                                                       # c("rcp26", "rcp85"),
-                                                       NULL,
+                                        selectizeInput("scenario_panel1", "Select RCP scenario (future only):",
+                                                       c(
+                                                         "RCP2.6" = "rcp26",
+                                                         "RCP8.5" = "rcp85"), selected = "rcp26",
+                                                       # NULL,
                                                        options = list(
-                                                         placeholder = 'For future time period onlys',
-                                                         onInitialize = I('function() { this.setValue(""); }')
+                                                         placeholder = 'For future time period only'
+                                                       #   onInitialize = I('function() { this.setValue(""); }')
                                                        )
                                         ),
                                         selectizeInput("categories_panel1", "Subset bivariate categories:",
@@ -223,13 +225,16 @@ ui <- bootstrapPage(
                                                              onInitialize = I('function() { this.setValue(""); }')
                                                            )
                                             ),
-                                            selectizeInput("scenario_panel2", "Select RCP scenario:",
+                                            selectizeInput("scenario_panel2", "Select RCP scenario (future only):",
                                                            # c("rcp26", "rcp85"),
-                                                           NULL,
-                                                           options = list(
-                                                             placeholder = 'Relevant only for future time period',
-                                                             onInitialize = I('function() { this.setValue(""); }')
-                                                           )
+                                                           c(
+                                                             "RCP2.6" = "rcp26",
+                                                             "RCP8.5" = "rcp85"), selected = "rcp26"
+                                                           # NULL,
+                                                           # options = list(
+                                                           #   placeholder = 'Relevant only for future time period',
+                                                           #   onInitialize = I('function() { this.setValue(""); }')
+                                                           # )
                                             ),
                                             selectizeInput("gcm_panel2", "Select GCM (no-choice currently):",
                                                            "CCSM4",
